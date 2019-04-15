@@ -12,35 +12,20 @@
 
 
 int main () {
-int sockfd, clientsockfd;
-char c;
-struct sockaddr_un server, client;
-   unlink(NAME);
-   sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-   //printf("%d\n", sockfd);
-   server.sun_family=AF_UNIX;
-   strcpy(server.sun_path, NAME);
-   int b = bind(sockfd, (struct sockaddr *)&server, SIZE);
-   printf("%d\n", b);
-   int l = listen(sockfd,5);
-   printf("%d\n", l);
-for (;;)
-      {
-		 socklen_t len = sizeof(client);
-         clientsockfd = accept(sockfd, (struct sockaddr *)&client, &len);
-		 if (clientsockfd > 0){
-			if (fork() == 0)
-			{
-				while (recv(clientsockfd, &c, 1, 0) >0 )
-				{
-					c= toupper(c);
-					send(clientsockfd, &c, 1, 0);
-				}
-				close(clientsockfd);
-				exit(0);
-			}
-		 }
-         close(clientsockfd);
-         unlink(NAME);
-   }
+  int sockfd;
+  char c;
+  struct sockaddr_in server;
+  struct sockaddr_in client;
+  int client_len = SIZE;
+  server.sin_family=AF_INET;
+  server.sin_port=htons(4321);
+  server.sin_addr.s_addr=INADDR_ANY;
+  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  bind(sockfd, (struct sockaddr *)&server, SIZE);
+  for (;;)
+  {
+    recvfrom(sockfd, &c, 1, 0, (struct sockaddr *)&client, &client_len);
+    c= toupper(c);
+    sendto(sockfd, &c, 1, 0, (struct sockaddr *)&client, client_len);
+  }
 }

@@ -12,25 +12,22 @@
 
 
 int main () {
-int sockfd, len;
-char c,rc;
-struct sockaddr_un toserver;
-   toserver.sun_family=AF_UNIX;
-   strcpy(toserver.sun_path,NAME);
-   len = sizeof(toserver);
-   sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
-   printf("%d\n", sockfd);
-   int connection = connect(sockfd, (struct sockaddr *)&toserver, len);
-   printf("%d\n", connection);
- for (rc='\n';;)
-   {
-      if (rc == '\n')
-         printf("Enter a lowercase char \n");
-		c= getchar();
-		send(sockfd, &c, 1, 0);
-		if (recv(sockfd, &rc, 1, 0)>0)
-			printf("%c\n",rc);
-		else
-			exit(1);
-   }
+  int sockfd, *ad_size;
+  char c;
+  struct sockaddr_in client = {AF_INET, INADDR_ANY, INADDR_ANY};
+  struct sockaddr_in server = {AF_INET, 4321};
+  socklen_t clientlen = sizeof(client);
+  server.sin_family=AF_INET;
+  server.sin_addr.s_addr = inet_addr("127.0.0.1");
+  server.sin_port=htons(4321);
+  sockfd = socket(PF_INET, SOCK_DGRAM, 0);
+  connect(sockfd, (struct sockaddr *)&server, sizeof(server));
+  printf("Enter a lowercase char  ");
+  for (;;)
+  {
+   read(0, &c, 1);
+   sendto(sockfd, &c, 1, 0, (struct sockaddr *)&server, sizeof(server));
+   recvfrom(sockfd, &c, 1, 0, (struct sockaddr *)&client, &clientlen);
+   printf("%c\n",c);
+  }
 }
