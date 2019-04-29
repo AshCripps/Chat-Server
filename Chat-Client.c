@@ -28,7 +28,7 @@ int main () {
   printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
   int con = connect(sockfd, (struct sockaddr *)&toserver, SIZE);
   poll_list[0].fd = sockfd; //Add the server to poll list
-  poll_list[0].events = POLLIN|POLLPRI; //Intrested in when the sockcet is available to be read;
+  poll_list[0].events = POLLIN|POLLPRI; //Intrested in when the socket is available to be read;
   errnum = errno;
   printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
   printf("%d\n", sockfd);
@@ -46,12 +46,15 @@ int main () {
         printf("Press any key to recieve a msg or type 't' to enter a msg \n");
         d = getchar();
         if (d == 't'){
+          *msg = ""; //reset string
           printf("> ");
           scanf("%s", msg);
-          sprintf(msg, "%s: %s", username, msg);
+          printf("%s\n", msg);
+          printf("%s\n", username);
+          sprintf(msg, "|%s|: %s", username, msg);
           send(sockfd, &msg, 150, 0);
           recv(sockfd, &msg, 150, 0);
-          printf("%s\n",msg);
+          printf("message sent is as follows: %s\n",msg);
         }else {
           printf("Checking for message....\n");
           polval = poll(poll_list, 1, 5000);

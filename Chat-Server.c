@@ -37,7 +37,7 @@ int main () {
             recv(clientsockfd, &username, 60, 0);
             sprintf(msg, "Welcome %s!", username);
             send(clientsockfd, &msg, 150, 0);
-            sprintf(msg, "Server: %s has connected", username);
+            sprintf(msg, "|Server|: %s has connected", username);
 
             printf("Added client: %d\n", l);
             if (l < 0) {exit(1);}
