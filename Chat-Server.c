@@ -8,12 +8,21 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #define SIZE sizeof(struct sockaddr_un)
-#define NAME "/mnt/socketFile"
 int clients[5];
 
+int addClients(int socket){ //Create my array of sockets - Not working atm because the variable is not shared across processes
+  int i;
+  for(i = 0; i < sizeof(clients); i++){
+    if (clients[i] == 0){
+      clients[i] = socket;
+      return i; //Socket added
+    }
+  }
+  return -1;
+}
 
 int main () {
-  int sockfd, clientsockfd, i, j, k, l;
+  int sockfd, clientsockfd, i, j, k, l, connection;
   char c, username[60], msg[150];
   struct sockaddr_in server;
   struct sockaddr_in client;
@@ -47,29 +56,20 @@ int main () {
               }
             }
             printf("%s has connected\n", username);
-            while (recv(clientsockfd, &msg, 150, 0) >0 )
-               {
-                 for(i = 0; i < sizeof(clients); i++){
-                   if (clients[i]>0){ //valid socket
-                     send(clients[i], &msg, 150, 0);
-                   }
-                 }
-               }
-            close(clientsockfd);
-            exit(0);
+            connection = 1;
+            while (connection == 1){
+              recv(clientsockfd, &msg, 150, 0);
+              printf("%s\n", msg);
+              for(i = 0; i < sizeof(clients); i++){
+                if (clients[i]>0){ //valid socket
+                  send(clients[i], &msg, 150, 0);
+                }
+              }
+            }
+            //close(clientsockfd);
+            //exit(0);
          }
          //send(clientsockfd, "hello", 150, 0);
          //close(clientsockfd);
    }
-}
-
-int addClients(int socket){ //Create my array of sockets - Not working atm because the variable is not shared across processes
-  int i;
-  for(i = 0; i < sizeof(clients); i++){
-    if (clients[i] == 0){
-      clients[i] = socket;
-      return i; //Socket added
-    }
-  }
-  return -1;
 }
