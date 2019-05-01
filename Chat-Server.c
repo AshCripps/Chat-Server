@@ -7,8 +7,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <sys/mman.h>
 #define SIZE sizeof(struct sockaddr_un)
-int clients[5];
+int *clients;
 
 int addClients(int socket){ //Create my array of sockets - Not working atm because the variable is not shared across processes
   int i;
@@ -27,6 +28,7 @@ int main () {
   struct sockaddr_in server;
   struct sockaddr_in client;
   int client_len = SIZE;
+  clients = mmap(NULL, sizeof(int) * 5, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   printf("%d\n", sockfd);
   server.sin_family=AF_INET;
