@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <poll.h>
+#include <time.h>
 #define SIZE sizeof(struct sockaddr_un)
 
 int bogoPrimes(int n){
@@ -35,6 +36,7 @@ int bogoPrimes(int n){
 int main () {
   int sockfd, errnum, polval, x, y;
   char c, rc, username[60], msg[150], msgS[150], *substr, d;
+  time_t prevTime, currTime;
   struct sockaddr_in toserver;
   struct pollfd poll_list[1];
   toserver.sin_family=AF_INET;
@@ -42,29 +44,30 @@ int main () {
   toserver.sin_port=htons(4321);
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
   errnum = errno;
-  printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
+  //printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
   int con = connect(sockfd, (struct sockaddr *)&toserver, SIZE);
   poll_list[0].fd = sockfd; //Add the server to poll list
   poll_list[0].events = POLLIN|POLLPRI; //Intrested in when the socket is available to be read;
   errnum = errno;
-  printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
+  //printf("Error is: %s the number is: %d\n", strerror(errno), errnum);
   sprintf(username, "PrimesBot: ");
   send(sockfd, &username, 60, 0);
   for (;;)
    {
       recv(sockfd, &msg, 150, 0);
+      prevTime = time(NULL);
       substr = strstr(msg, "primes");
       if (substr != NULL){
         substr += 7;
         x = atoi(substr);
         y = bogoPrimes(x);
-        sprintf(msg, "Biggest prime below %d is %d", x, y);
+        currTime = time(NULL) - prevTime;
+        sprintf(msg, "Biggest prime below %d is %d. Took %lld seconds", x, y, currTime);
         printf("%s\n", msg);
         strcpy(msgS, username);
         strcat(msgS, msg);
         send(sockfd, &msgS, 150, 0);
       }
-
 
 
    }
